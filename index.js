@@ -24,3 +24,8 @@ exports.init_ep_ai_core = async (hookName, {logger: l}) => {
 };
 
 exports.getSettings = getSettings;
+
+// Re-export modules for use by ep_ai_mcp and ep_ai_chat
+exports.accessControl = require('./accessControl');
+exports.llmClient = require('./llmClient');
+exports.authorship = require('./authorship');
