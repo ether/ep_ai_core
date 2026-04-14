@@ -1,0 +1,11 @@
+{
+  "ep_ai_core.access_denied": "Access denied: AI cannot access this pad",
+  "ep_ai_core.access_denied_edit": "Access denied: AI cannot edit this pad",
+  "ep_ai_core.access_mode_none": "none",
+  "ep_ai_core.access_mode_readOnly": "read-only",
+  "ep_ai_core.access_mode_full": "full",
+  "ep_ai_core.settings_loaded": "AI core settings loaded",
+  "ep_ai_core.llm_error": "LLM API error",
+  "ep_ai_core.llm_rate_limited": "AI service is rate limited. Please try again shortly.",
+  "ep_ai_core.llm_auth_error": "AI service rejected the request. Please check the API key configuration."
+}
