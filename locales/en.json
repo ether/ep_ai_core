@@ -7,5 +7,21 @@
   "ep_ai_core.settings_loaded": "AI core settings loaded",
   "ep_ai_core.llm_error": "LLM API error",
   "ep_ai_core.llm_rate_limited": "AI service is rate limited. Please try again shortly.",
-  "ep_ai_core.llm_auth_error": "AI service rejected the request. Please check the API key configuration."
+  "ep_ai_core.llm_auth_error": "AI service rejected the request. Please check the API key configuration.",
+  "ep_ai_core.admin.menu": "AI Settings",
+  "ep_ai_core.admin.title": "AI Integration Settings",
+  "ep_ai_core.admin.provider": "LLM Provider",
+  "ep_ai_core.admin.provider_type": "Provider",
+  "ep_ai_core.admin.model": "Model",
+  "ep_ai_core.admin.base_url": "API Base URL",
+  "ep_ai_core.admin.max_tokens": "Max Tokens",
+  "ep_ai_core.admin.apikey_note": "API key is configured in settings.json for security and cannot be changed here.",
+  "ep_ai_core.admin.access": "Access Control",
+  "ep_ai_core.admin.default_mode": "Default Access Mode",
+  "ep_ai_core.admin.chat": "Chat Settings",
+  "ep_ai_core.admin.trigger": "Trigger Phrase",
+  "ep_ai_core.admin.author_name": "AI Author Name",
+  "ep_ai_core.admin.author_color": "Color",
+  "ep_ai_core.admin.test_btn": "Test Connection",
+  "ep_ai_core.admin.save_btn": "Save Settings"
 }

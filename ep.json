@@ -4,7 +4,8 @@
       "name": "ep_ai_core",
       "hooks": {
         "loadSettings": "ep_ai_core/index",
-        "init_ep_ai_core": "ep_ai_core/index"
+        "init_ep_ai_core": "ep_ai_core/index",
+        "expressCreateServer": "ep_ai_core/admin"
       }
     }
   ]
