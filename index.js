@@ -8,7 +8,8 @@ let pluginSettings = null;
 const getSettings = () => pluginSettings;
 
 exports.loadSettings = async (hookName, {settings}) => {
-  pluginSettings = settings.ai || {};
+  // Etherpad only passes known settings — plugins use ep_<name> keys
+  pluginSettings = settings.ep_ai_core || {};
   if (!pluginSettings.access) {
     pluginSettings.access = {defaultMode: 'full', pads: {}};
   }
@@ -17,6 +18,7 @@ exports.loadSettings = async (hookName, {settings}) => {
   }
   logger.info('ep_ai_core settings loaded');
   logger.info(`Default access mode: ${pluginSettings.access.defaultMode}`);
+  logger.info(`API base URL: ${pluginSettings.apiBaseUrl || '(not configured)'}`);
 };
 
 exports.init_ep_ai_core = async (hookName, {logger: l}) => {
