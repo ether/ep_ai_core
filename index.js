@@ -31,3 +31,4 @@ exports.getSettings = getSettings;
 exports.accessControl = require('./accessControl');
 exports.llmClient = require('./llmClient');
 exports.authorship = require('./authorship');
+exports.i18n = require('./i18n');
