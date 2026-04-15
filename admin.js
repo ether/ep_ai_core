@@ -1,5 +1,6 @@
 'use strict';
 
+const url = require('url');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const log4js = require('ep_etherpad-lite/node_modules/log4js');
 const logger = log4js.getLogger('ep_ai_core:admin');
@@ -7,8 +8,9 @@ const logger = log4js.getLogger('ep_ai_core:admin');
 /**
  * Middleware to require admin authentication for AI settings routes.
  * Reuses Etherpad's existing auth — checks for is_admin on the session.
+ * Fix: properly awaits JWT verification (no race condition).
  */
-const requireAdmin = (req, res, next) => {
+const requireAdmin = async (req, res, next) => {
   // Check session-based auth (Etherpad's webaccess sets this)
   const session = req.session;
   const user = session?.user;
@@ -22,19 +24,13 @@ const requireAdmin = (req, res, next) => {
       const {publicKeyExported} = require('ep_etherpad-lite/node/security/OAuth2Provider');
       if (publicKeyExported) {
         const token = authHeader.replace(/^Bearer\s+/i, '');
-        // Synchronous decode to check admin claim (verification done by webaccess)
-        const {jwtVerify} = jose;
-        jwtVerify(token, publicKeyExported, {algorithms: ['RS256']})
-            .then((result) => {
-              if (result.payload.admin || result.payload.is_admin) return next();
-              res.status(403).json({error: 'Admin access required'});
-            })
-            .catch(() => {
-              res.status(401).json({error: 'Invalid token'});
-            });
-        return; // async handling
+        const result = await jose.jwtVerify(token, publicKeyExported, {algorithms: ['RS256']});
+        if (result.payload.admin || result.payload.is_admin) return next();
+        return res.status(403).json({error: 'Admin access required'});
       }
-    } catch { /* fall through */ }
+    } catch {
+      return res.status(401).json({error: 'Invalid token'});
+    }
   }
 
   // No valid auth — redirect to admin login
@@ -49,20 +45,45 @@ const requireAdmin = (req, res, next) => {
  */
 const sanitizeSettingsForClient = (aiSettings) => {
   const safe = {...aiSettings};
-  // Never send the API key to the client
   delete safe.apiKey;
   return safe;
 };
 
 /**
  * Escape a JSON string for safe embedding in HTML <script> tags.
- * Prevents XSS via </script> injection.
  */
 const safeJsonForHtml = (obj) => {
   return JSON.stringify(obj)
       .replace(/</g, '\\u003c')
       .replace(/>/g, '\\u003e')
       .replace(/&/g, '\\u0026');
+};
+
+/**
+ * Check if a URL points to a private/internal network address.
+ * Blocks RFC 1918, loopback, link-local, and cloud metadata IPs.
+ */
+const isPrivateUrl = (urlString) => {
+  try {
+    const parsed = new URL(urlString);
+    const hostname = parsed.hostname;
+    // Block obvious private/internal hostnames
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') return true;
+    if (hostname === '0.0.0.0') return true;
+    // Cloud metadata endpoints
+    if (hostname === '169.254.169.254') return true;
+    if (hostname.endsWith('.internal') || hostname.endsWith('.local')) return true;
+    // RFC 1918 ranges
+    const parts = hostname.split('.').map(Number);
+    if (parts.length === 4 && parts.every((p) => !isNaN(p))) {
+      if (parts[0] === 10) return true; // 10.0.0.0/8
+      if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true; // 172.16.0.0/12
+      if (parts[0] === 192 && parts[1] === 168) return true; // 192.168.0.0/16
+    }
+    return false;
+  } catch {
+    return true; // If we can't parse it, block it
+  }
 };
 
 /**
@@ -76,10 +97,9 @@ const validateSettings = (input) => {
 
   const cleaned = {};
   if (input.apiBaseUrl && typeof input.apiBaseUrl === 'string') {
-    // SSRF protection: only allow http(s) URLs
-    const url = input.apiBaseUrl.trim();
-    if (/^https?:\/\//i.test(url)) {
-      cleaned.apiBaseUrl = url;
+    const urlStr = input.apiBaseUrl.trim();
+    if (/^https?:\/\//i.test(urlStr) && !isPrivateUrl(urlStr)) {
+      cleaned.apiBaseUrl = urlStr;
     }
   }
   if (input.model && typeof input.model === 'string') {
@@ -122,7 +142,6 @@ exports.expressCreateServer = (hookName, {app}) => {
       html = fs.readFileSync(
           path.join(__dirname, 'templates', 'admin.html'), 'utf8');
     }
-    // Inject sanitized settings (no API key) with XSS-safe encoding
     html = html.replace('__SETTINGS_JSON__',
         safeJsonForHtml(sanitizeSettingsForClient(aiSettings)));
     res.type('html').send(html);
@@ -174,7 +193,15 @@ exports.expressCreateServer = (hookName, {app}) => {
       ], {maxTokens: 50});
       res.json({success: true, response: result.content, usage: result.usage});
     } catch (err) {
-      res.json({success: false, error: err.message});
+      // Sanitize error — don't leak internal API details
+      const safeMessage = err.message.includes('401') ? 'Authentication failed (check API key)'
+        : err.message.includes('429') ? 'Rate limited by provider'
+        : err.message.includes('ECONNREFUSED') ? 'Connection refused (check API URL)'
+        : 'Connection failed';
+      res.json({success: false, error: safeMessage});
     }
   });
 };
+
+exports.isPrivateUrl = isPrivateUrl;
+exports.validateSettings = validateSettings;
