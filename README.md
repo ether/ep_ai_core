@@ -1,4 +1,4 @@
-# ep_ai_core
+# AI Core for Etherpad
 
 Core AI infrastructure for Etherpad. Provides shared LLM client, access control,
 and authorship analysis used by `ep_ai_mcp` and `ep_ai_chat`.
