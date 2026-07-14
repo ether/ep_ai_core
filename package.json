@@ -15,7 +15,7 @@
     "minimatch": "^10.2.5"
   },
   "devDependencies": {
-    "eslint": "^10.6.0",
+    "eslint": "^10.7.0",
     "eslint-config-etherpad": "^4.0.5",
     "typescript": "^7.0.2"
   },
