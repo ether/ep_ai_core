@@ -138,7 +138,8 @@ const create = (config) => {
       ? await completeAnthropic(baseUrl, apiKey, model, messages, maxTokens)
       : await completeOpenAI(baseUrl, apiKey, model, messages, maxTokens);
 
-    logger.debug(`LLM response: ${result.content.length} chars, tokens=${result.usage.total_tokens || '?'}`);
+    logger.debug(`LLM response: ${result.content.length} chars, ` +
+        `tokens=${result.usage.total_tokens || '?'}`);
     return result;
   };
 

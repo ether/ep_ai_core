@@ -1,6 +1,5 @@
 'use strict';
 
-const url = require('url');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const log4js = require('ep_etherpad-lite/node_modules/log4js');
 const logger = log4js.getLogger('ep_ai_core:admin');
@@ -52,12 +51,10 @@ const sanitizeSettingsForClient = (aiSettings) => {
 /**
  * Escape a JSON string for safe embedding in HTML <script> tags.
  */
-const safeJsonForHtml = (obj) => {
-  return JSON.stringify(obj)
-      .replace(/</g, '\\u003c')
-      .replace(/>/g, '\\u003e')
-      .replace(/&/g, '\\u0026');
-};
+const safeJsonForHtml = (obj) => JSON.stringify(obj)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
 
 /**
  * Check if a URL points to a private/internal network address.
@@ -134,14 +131,11 @@ exports.expressCreateServer = (hookName, {app}) => {
     const aiSettings = settings.ep_ai_core || {};
     const fs = require('fs');
     const path = require('path');
-    let html;
-    try {
-      html = fs.readFileSync(
-          require.resolve('ep_ai_core/templates/admin.html'), 'utf8');
-    } catch {
-      html = fs.readFileSync(
-          path.join(__dirname, 'templates', 'admin.html'), 'utf8');
-    }
+    // __dirname is this package's root, so the template always sits next to
+    // us; a self-referential require.resolve() only worked when the plugin
+    // happened to be resolvable from its own node_modules.
+    let html = fs.readFileSync(
+        path.join(__dirname, 'templates', 'admin.html'), 'utf8');
     html = html.replace('__SETTINGS_JSON__',
         safeJsonForHtml(sanitizeSettingsForClient(aiSettings)));
     res.type('html').send(html);
@@ -179,7 +173,10 @@ exports.expressCreateServer = (hookName, {app}) => {
     try {
       const aiSettings = settings.ep_ai_core || {};
       if (!aiSettings.apiBaseUrl || !aiSettings.apiKey) {
-        return res.json({success: false, error: 'API base URL and key must be configured in settings.json'});
+        return res.json({
+          success: false,
+          error: 'API base URL and key must be configured in settings.json',
+        });
       }
       const llmClient = require('./llmClient');
       const client = llmClient.create({
