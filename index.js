@@ -5,17 +5,27 @@ const logger = log4js.getLogger('ep_ai_core');
 
 let pluginSettings = null;
 
-const getSettings = () => pluginSettings;
+const normalizeSettings = (raw) => {
+  const result = raw || {};
+  if (!result.access) result.access = {defaultMode: 'full', pads: {}};
+  if (!result.access.defaultMode) result.access.defaultMode = 'full';
+  return result;
+};
+
+// ep_ai_mcp and ep_ai_chat can end up with a different copy of this module
+// than the one Etherpad ran loadSettings on (e.g. a pnpm workspace install
+// next to a plugin_packages one), so fall back to Etherpad's own settings
+// rather than returning null and crashing every access check.
+const getSettings = () => {
+  if (pluginSettings) return pluginSettings;
+  const epSettings = require('ep_etherpad-lite/node/utils/Settings');
+  pluginSettings = normalizeSettings((epSettings.default || epSettings).ep_ai_core);
+  return pluginSettings;
+};
 
 exports.loadSettings = async (hookName, {settings}) => {
   // Etherpad only passes known settings — plugins use ep_<name> keys
-  pluginSettings = settings.ep_ai_core || {};
-  if (!pluginSettings.access) {
-    pluginSettings.access = {defaultMode: 'full', pads: {}};
-  }
-  if (!pluginSettings.access.defaultMode) {
-    pluginSettings.access.defaultMode = 'full';
-  }
+  pluginSettings = normalizeSettings(settings.ep_ai_core);
   logger.info('ep_ai_core settings loaded');
   logger.info(`Default access mode: ${pluginSettings.access.defaultMode}`);
   logger.info(`API base URL: ${pluginSettings.apiBaseUrl || '(not configured)'}`);
