@@ -20,8 +20,8 @@ Add an `ep_ai_core` block to your `settings.json`:
   "ep_ai_core": {
     "apiBaseUrl": "https://api.anthropic.com/v1",
     "apiKey": "sk-ant-...",
-    "model": "claude-sonnet-5-5",
-    "maxTokens": 4096,
+    "model": "sonnet",
+    "maxTokens": 16000,
     "provider": "anthropic",
     "access": {
       "defaultMode": "full",
@@ -43,6 +43,41 @@ Add an `ep_ai_core` block to your `settings.json`:
 }
 ```
 
+### Choosing a model
+
+Set `model` to a family keyword and the plugin picks the newest model in that
+family, so you don't have to edit `settings.json` every time a model is
+retired:
+
+| `model`                     | Resolves to (example)          |
+|-----------------------------|--------------------------------|
+| `"sonnet"` (recommended)    | the newest Claude Sonnet       |
+| `"opus"`                    | the newest Claude Opus         |
+| `"haiku"`                   | the newest Claude Haiku        |
+| `"gpt-sol"`                 | the newest `gpt-*-sol` model   |
+| `"gemini-flash"`            | the newest Gemini Flash        |
+| `"grok"`                    | the newest Grok                |
+| `"claude-sonnet-5-5"`       | exactly that model             |
+
+How it works:
+
+- Any `model` value without a digit is a family keyword. The plugin looks it
+  up in the provider's `GET /models` list at startup and caches the result
+  for 24 hours. The resolved ID is logged (`LLM model: ...`).
+- Anything with a digit is an exact model ID and is sent as-is.
+- `model` is optional. On Anthropic it defaults to `"sonnet"`; on other
+  providers it defaults to the newest model the endpoint lists, with a
+  warning.
+- If an exact ID returns 404 (the model was retired), the plugin logs one
+  warning naming the replacement and retries with the newest model in the
+  same family. Update `settings.json` when you see it.
+- If a keyword can't be resolved (the provider has no `/models` endpoint, or
+  nothing matches), the value is sent as an exact ID with a warning, so
+  digit-free IDs such as `deepseek-chat` still work.
+
+`maxTokens` includes the model's thinking tokens on current Claude models, so
+leave it at 16000 (the default) or higher.
+
 ### OpenAI-compatible provider
 
 To use OpenAI, Ollama, or any OpenAI-compatible API, set the base URL and
@@ -53,7 +88,7 @@ omit `provider` (auto-detected) or set it to `"openai"`:
   "ep_ai_core": {
     "apiBaseUrl": "https://api.openai.com/v1",
     "apiKey": "sk-...",
-    "model": "gpt-6.1-sol",
+    "model": "gpt-sol",
     "provider": "openai"
   }
 }

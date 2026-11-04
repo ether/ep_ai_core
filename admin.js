@@ -187,7 +187,7 @@ exports.expressCreateServer = (hookName, {app}) => {
       });
       const result = await client.complete([
         {role: 'user', content: 'Reply with exactly: "Connection successful"'},
-      ], {maxTokens: 50});
+      ], {maxTokens: 1024});
       res.json({success: true, response: result.content, usage: result.usage});
     } catch (err) {
       // Sanitize error — don't leak internal API details
