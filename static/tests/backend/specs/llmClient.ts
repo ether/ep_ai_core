@@ -126,7 +126,7 @@ describe('ep_ai_core - llmClient', function () {
       const client = llmClient.create({
         apiBaseUrl: `http://127.0.0.1:${mockPort}`,
         apiKey: 'sk-ant-test',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-5-5',
         provider: 'anthropic',
       });
 

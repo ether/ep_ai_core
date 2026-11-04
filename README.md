@@ -20,7 +20,7 @@ Add an `ep_ai_core` block to your `settings.json`:
   "ep_ai_core": {
     "apiBaseUrl": "https://api.anthropic.com/v1",
     "apiKey": "sk-ant-...",
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5-5",
     "maxTokens": 4096,
     "provider": "anthropic",
     "access": {
@@ -53,7 +53,7 @@ omit `provider` (auto-detected) or set it to `"openai"`:
   "ep_ai_core": {
     "apiBaseUrl": "https://api.openai.com/v1",
     "apiKey": "sk-...",
-    "model": "gpt-4o",
+    "model": "gpt-6.1-sol",
     "provider": "openai"
   }
 }
