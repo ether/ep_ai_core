@@ -29,6 +29,13 @@ exports.loadSettings = async (hookName, {settings}) => {
   logger.info('ep_ai_core settings loaded');
   logger.info(`Default access mode: ${pluginSettings.access.defaultMode}`);
   logger.info(`API base URL: ${pluginSettings.apiBaseUrl || '(not configured)'}`);
+  // Resolve a family keyword ("sonnet") to a model ID now, so the result is
+  // logged at startup and cached. Don't hold up startup on the network.
+  if (pluginSettings.apiBaseUrl && pluginSettings.apiKey) {
+    exports.llmClient.create(pluginSettings).resolveModel()
+        .then((id) => logger.info(`LLM model: ${id}`))
+        .catch((err) => logger.warn(`Could not resolve LLM model: ${err.message}`));
+  }
 };
 
 exports.init_ep_ai_core = async (hookName, {logger: l}) => {
