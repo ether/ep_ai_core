@@ -33,7 +33,7 @@ describe('ep_ai_core - admin UI', function () {
           .set('Content-Type', 'application/json')
           .send({
             provider: 'anthropic',
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-5-5',
             apiBaseUrl: 'https://api.anthropic.com/v1',
             maxTokens: '4096',
             defaultMode: 'full',

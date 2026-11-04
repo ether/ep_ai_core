@@ -120,7 +120,7 @@ const completeOpenAI = async (baseUrl, apiKey, model, messages, maxTokens) => {
  * @param {object} config
  * @param {string} config.apiBaseUrl - e.g. "https://api.anthropic.com/v1" or "http://localhost:11434/v1"
  * @param {string} config.apiKey
- * @param {string} config.model - e.g. "claude-sonnet-4-20250514" or "gpt-4o"
+ * @param {string} config.model - e.g. "claude-sonnet-5-5" or "gpt-6.1-sol"
  * @param {number} [config.maxTokens]
  * @param {string} [config.provider] - "anthropic" or "openai" (auto-detected from URL if omitted)
  * @returns {{complete: function}}
